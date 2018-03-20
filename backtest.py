@@ -1,4 +1,5 @@
 from fetch_data import get_stock_pd
+from strategy import basic_strategy
 import backtrader as bt
 
 if __name__ == '__main__':
@@ -11,10 +12,9 @@ if __name__ == '__main__':
             )
     
     cerebro.adddata(data)
-
+    cerebro.broker.setcash(100000.0)
+    cerebro.addstrategy(basic_strategy)
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
-
     cerebro.run()
-
+    cerebro.plot()
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
-
