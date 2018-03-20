@@ -4,13 +4,19 @@ import backtrader as bt
 import sys
 
 
+class myPandasData(bt.feeds.PandasData):
+    lines=('change',)
+    params = (('change', 8),)
+
+
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
 
     stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2017, 1))
-    data = bt.feeds.PandasData(
+    data =  myPandasData(
             dataname=stock_pd, 
-            volume='transaction'
+            volume='transaction',
+            change='change'
             )
     
     cerebro.adddata(data)

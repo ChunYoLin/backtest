@@ -32,6 +32,11 @@ class basic_strategy(bt.Strategy):
                 self.datas[0], period=self.params.maperiod_fast)
         self.ema_slow = bt.indicators.ExponentialMovingAverage(
                 self.datas[0], period=self.params.maperiod_slow)
+        self.change = self.datas[0].change / self.datas[-1].close
+        self.volume = self.datas[0].volume
+        self.stress_level = abs(self.change / self.volume)
+        self.stress_count = 0
+        self.stress_history = [0, 0, 0]
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -75,19 +80,17 @@ class basic_strategy(bt.Strategy):
     def next(self):
         # Simply log the closing price of the series from the reference
         self.log('Close, %.2f' % self.dataclose[0])
+        if self.stress_level[0] < self.stress_level[-1]:
+            self.stress_history[self.stress_count%3] = -1
+        if self.stress_level[0] > self.stress_level[-1]:
+            self.stress_history[self.stress_count%3] = 1
+        self.stress_count += 1
         if not self.position:
-            if self.ema_fast[0] > self.ema_slow[0]:
+            if sum(self.stress_history) <= -3:
                 self.log('BUY CREATE, %.2f' % self.dataclose[0])
                 self.order = self.buy()
         else:
-            if self.ema_fast[0] < self.ema_slow[0]:
+            if sum(self.stress_history) >= 3:
                 self.log('SELL CREATE, %.2f' % self.dataclose[0])
                 self.order = self.sell()
-
-    def stop(self):
-        self.log('(MA Period fast %2d) (MA Period slow %2d) Ending Value %.2f' %
-               (self.params.maperiod_fast,
-                self.params.maperiod_slow, 
-                self.broker.getvalue()), 
-                doprint=True)
 
