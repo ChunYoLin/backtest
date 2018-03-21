@@ -86,11 +86,11 @@ class basic_strategy(bt.Strategy):
             self.stress_history[self.stress_count%3] = 1
         self.stress_count += 1
         if not self.position:
-            if sum(self.stress_history) <= -3:
+            if sum(self.stress_history) == -3:
                 self.log('BUY CREATE, %.2f' % self.dataclose[0])
                 self.order = self.buy()
         else:
-            if sum(self.stress_history) >= 3:
+            if sum(self.stress_history) == 3:
                 self.log('SELL CREATE, %.2f' % self.dataclose[0])
                 self.order = self.sell()
 
