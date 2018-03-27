@@ -1,16 +1,16 @@
-import datetime  # For datetime objects
-import os.path  # To manage paths
-import sys  # To find out the script name (in argv[0])
+import indicator as ind
 
 # Import the backtrader platform
 import backtrader as bt
+
+import datetime  # For datetime objects
+import os.path  # To manage paths
+import sys  # To find out the script name (in argv[0])
 
 class basic_strategy(bt.Strategy):
     params = (
         ('exitbars', 5),
         ('printlog', False),
-        ('maperiod_fast', 10),
-        ('maperiod_slow', 30),
     )
 
     def log(self, txt, dt=None, doprint=False):
@@ -21,22 +21,14 @@ class basic_strategy(bt.Strategy):
 
     def __init__(self):
         # Keep a reference to the "close" line in the data[0] dataseries
-        self.dataopen = self.datas[0].open
-        self.datahigh = self.datas[0].high
         self.dataclose = self.datas[0].close
-        self.datalow = self.datas[0].low
         self.order = None
         self.buyprice = None
         self.buycomm = None
-        self.ema_fast = bt.indicators.ExponentialMovingAverage(
-                self.datas[0], period=self.params.maperiod_fast)
-        self.ema_slow = bt.indicators.ExponentialMovingAverage(
-                self.datas[0], period=self.params.maperiod_slow)
-        self.change = self.datas[0].change / self.datas[-1].close
-        self.volume = self.datas[0].volume
-        self.stress_level = abs(self.change / self.volume)
+        self.stress_level = ind.ChangePerVolume(self.data)
         self.stress_count = 0
         self.stress_history = [0, 0, 0]
+        self.rpl = ind.RelativePriceLevel(self.data)
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -56,7 +48,7 @@ class basic_strategy(bt.Strategy):
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
 
-            elif order.issell():
+            else:
                 self.log(
                        'SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
                        (order.executed.price,
@@ -80,17 +72,19 @@ class basic_strategy(bt.Strategy):
     def next(self):
         # Simply log the closing price of the series from the reference
         self.log('Close, %.2f' % self.dataclose[0])
+
+        if self.order:
+            return
         if self.stress_level[0] < self.stress_level[-1]:
             self.stress_history[self.stress_count%3] = -1
         if self.stress_level[0] > self.stress_level[-1]:
             self.stress_history[self.stress_count%3] = 1
         self.stress_count += 1
-        if not self.position:
-            if sum(self.stress_history) == -3:
-                self.log('BUY CREATE, %.2f' % self.dataclose[0])
-                self.order = self.buy()
-        else:
-            if sum(self.stress_history) == 3:
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
-                self.order = self.sell()
+        if sum(self.stress_history) == 3 and self.rpl[0] < 0:
+            self.log('BUY CREATE, %.2f' % self.dataclose[0])
+            self.order = self.buy()
 
+        if self.position:
+            if sum(self.stress_history) == -3 and self.rpl[0] > 0:
+                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+                self.order = self.close()
