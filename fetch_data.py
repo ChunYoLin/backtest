@@ -59,5 +59,5 @@ def _get_twstock(stock_no="0050", fetch_from=None):
 def get_stock_pd(stock_no="0050", fetch_from=None):
     S = _get_twstock(stock_no, fetch_from)
     keys = list(S[0]._fields)
-    return DataFrame(S, columns=keys).set_index("date")
+    return DataFrame(S, columns=keys).set_index("date").apply(pd.to_numeric)
 
