@@ -78,7 +78,7 @@ class basic_strategy(bt.Strategy):
 
         if self.order:
             return
-        if 1.0 in self.DICross.get(size=10) and (self.ADX[0] - self.ADX[-9]) > 0:
+        if 1.0 in self.DICross.get(size=5) and (self.ADX[0] - self.ADX[-2]) > 0:
             self.order = self.buy()
-        elif -1.0 in self.DICross.get(size=10) and (self.ADX[0] - self.ADX[-9]) > 0:
+        if -1.0 in self.DICross.get(size=5) and (self.ADX[0] - self.ADX[-2]) > 0:
             self.order = self.sell()
