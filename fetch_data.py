@@ -33,17 +33,6 @@ def _get_twstock(stock_no="0050", fetch_from=None):
     if os.path.isfile("{}/{}.csv".format(database_path, stock_no)):
         print("local data found!")
         S =  _get_twstock_local(stock_no)
-        #  if data mismatched dowload it again
-        if fetch_from:
-            start_day = Stock(stock_no).fetch(fetch_from[0], fetch_from[1])[0].date.day
-            start_datetime = datetime(fetch_from[0], fetch_from[1], start_day)
-            for idx, s in enumerate(S):
-                if s.date == start_datetime:
-                    return S[idx:]
-            print("start date not found, re-fetch online...")
-            S =  _get_twstock_online(stock_no, fetch_from, save=True)
-            return S
-
         #  if data too old download it again
         local_datetime = S[-1].date
         now_datetime = datetime.now()
@@ -51,6 +40,20 @@ def _get_twstock(stock_no="0050", fetch_from=None):
         if timedetla.total_seconds()/3600 > 44:
             print("end date not found, re-fetch online...")
             S = _get_twstock_online(stock_no, fetch_from, save=True)
+            return S
+        #  if data start date mismatched dowload it again
+        if fetch_from:
+            start_day = Stock(stock_no).fetch(fetch_from[0], fetch_from[1])[0].date.day
+            start_datetime = datetime(fetch_from[0], fetch_from[1], start_day)
+            found = 0
+            for idx, s in enumerate(S):
+                if s.date == start_datetime:
+                    found = 1
+                    return S[idx:]
+            print("start date not found, re-fetch online...")
+            S = _get_twstock_online(stock_no, fetch_from, save=True)
+            return S
+
     else:
         print("no local date, fetch online...")
         S = _get_twstock_online(stock_no, fetch_from, save=True)

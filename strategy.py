@@ -25,10 +25,13 @@ class basic_strategy(bt.Strategy):
         self.order = None
         self.buyprice = None
         self.buycomm = None
-        self.stress_level = ind.ChangePerVolume(self.data)
-        self.stress_count = 0
-        self.stress_history = [0, 0, 0]
-        self.rpl = ind.RelativePriceLevel(self.data)
+        self.ADX_DI = ind.ADX_DI(self.data)
+        self.ADX = self.ADX_DI.ADX
+        self.DIPlus = self.ADX_DI.DIPlus
+        self.DIMinus = self.ADX_DI.DIMinus
+        self.DICross = bt.indicators.CrossOver(self.DIPlus, self.DIMinus)
+        self.MACD = bt.talib.MACD(self.data)
+        self.MACDCross = bt.indicators.CrossOver(self.MACD, 0.0)
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -75,16 +78,7 @@ class basic_strategy(bt.Strategy):
 
         if self.order:
             return
-        if self.stress_level[0] < self.stress_level[-1]:
-            self.stress_history[self.stress_count%3] = -1
-        if self.stress_level[0] > self.stress_level[-1]:
-            self.stress_history[self.stress_count%3] = 1
-        self.stress_count += 1
-        if sum(self.stress_history) == 3 and self.rpl[0] < 0:
-            self.log('BUY CREATE, %.2f' % self.dataclose[0])
+        if 1.0 in self.DICross.get(size=10) and (self.ADX[0] - self.ADX[-9]) > 0:
             self.order = self.buy()
-
-        if self.position:
-            if sum(self.stress_history) == -3 and self.rpl[0] > 0:
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
-                self.order = self.close()
+        elif -1.0 in self.DICross.get(size=10) and (self.ADX[0] - self.ADX[-9]) > 0:
+            self.order = self.sell()

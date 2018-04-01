@@ -15,4 +15,11 @@ class RelativePriceLevel(bt.Indicator):
         self.sma = bt.talib.SMA(self.data, timeperiod=self.p.period)
         self.lines.rpl = self.datas[0].close - self.sma
         
+class ADX_DI(bt.Indicator):
+    lines = ('ADX', 'DIPlus', 'DIMinus')
+    params = (('period', 14),)
 
+    def __init__(self):
+        self.lines.ADX = bt.indicators.AverageDirectionalMovementIndex(self.data, period=self.p.period) 
+        self.lines.DIPlus = bt.indicators.PlusDirectionalIndicator(self.data, period=self.p.period)
+        self.lines.DIMinus = bt.indicators.MinusDirectionalIndicator(self.data, period=self.p.period)
