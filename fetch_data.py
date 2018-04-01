@@ -59,8 +59,55 @@ def _get_twstock(stock_no="0050", fetch_from=None):
         S = _get_twstock_online(stock_no, fetch_from, save=True)
     return S
 
-def get_stock_pd(stock_no="0050", fetch_from=None):
+def _get_stock_pd_in_day(stock_no="0050", fetch_from=None):
     S = _get_twstock(stock_no, fetch_from)
     keys = list(S[0]._fields)
-    return DataFrame(S, columns=keys).set_index("date").apply(pd.to_numeric)
+    S = DataFrame(S, columns=keys)    
+    S["weekday"] = S["date"].apply(lambda x: x.date().weekday())
+    S = S.set_index("date").apply(pd.to_numeric)
+    S["change"] = S["change"] / S["close"].shift(1)
+    return S
+
+def _get_stock_pd_in_week(stock_no="0050", fetch_from=None):
+    S_day = _get_stock_pd_in_day(stock_no, fetch_from)
+    S_week = S_day.resample(
+            'W', 
+            how=
+            {"capacity": 'sum',
+             "turnover": 'sum',   
+             "open": 'first',   
+             "high": 'max',
+             "low": 'min',
+             "close": 'last',
+             "change": 'sum',
+             "transaction": 'sum'
+            })
+    S_week = S_week.dropna()
+    return S_week
+
+def _get_stock_pd_in_month(stock_no="0050", fetch_from=None):
+    S_day = _get_stock_pd_in_day(stock_no, fetch_from)
+    S_month = S_day.resample(
+            'M', 
+            how=
+            {"capacity": 'sum',
+             "turnover": 'sum',   
+             "open": 'first',   
+             "high": 'max',
+             "low": 'min',
+             "close": 'last',
+             "change": 'sum',
+             "transaction": 'sum'
+            })
+    S_month = S_month.dropna()
+    return S_month
+
+
+def get_stock_pd(stock_no="0050", fetch_from=None, scale="day"):
+    if scale == "day":
+        return _get_stock_pd_in_day(stock_no, fetch_from)
+    if scale == "week":
+        return _get_stock_pd_in_week(stock_no, fetch_from)
+    if scale == "month":
+        return _get_stock_pd_in_month(stock_no, fetch_from)
 

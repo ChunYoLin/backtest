@@ -12,11 +12,10 @@ class myPandasData(bt.feeds.PandasData):
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
 
-    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2015, 1))
-    stock_pd["change"] = stock_pd["change"] / stock_pd["close"].shift(1)
+    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2015, 1), scale="day")
     data =  myPandasData(
             dataname=stock_pd, 
-            volume='transaction',
+            volume='capacity',
             change='change'
             )
     
