@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 import csv
 import os.path
+import sys
 
 database_path = "./database/"
 def _get_twstock_online(stock_no="0050", fetch_from=None, save=False):
@@ -30,29 +31,28 @@ def _get_twstock_local(stock_no="0050"):
         return Datas
 
 def _get_twstock(stock_no="0050", fetch_from=None):
+    if fetch_from == None:
+        print("please specify the start date")
+        sys.exit(0)
     if os.path.isfile("{}/{}.csv".format(database_path, stock_no)):
         print("local data found!")
         S =  _get_twstock_local(stock_no)
         #  if data too old download it again
-        local_datetime = S[-1].date
-        now_datetime = datetime.now()
-        timedetla = now_datetime - local_datetime
-        if timedetla.total_seconds()/3600 > 44:
+        end_datetime = Stock(stock_no).date[-1]
+        local_end_datetime = S[-1].date
+        if local_end_datetime != end_datetime:
             print("end date not found, re-fetch online...")
             S = _get_twstock_online(stock_no, fetch_from, save=True)
             return S
         #  if data start date mismatched dowload it again
-        if fetch_from:
-            start_day = Stock(stock_no).fetch(fetch_from[0], fetch_from[1])[0].date.day
-            start_datetime = datetime(fetch_from[0], fetch_from[1], start_day)
-            found = 0
-            for idx, s in enumerate(S):
-                if s.date == start_datetime:
-                    found = 1
-                    return S[idx:]
-            print("start date not found, re-fetch online...")
-            S = _get_twstock_online(stock_no, fetch_from, save=True)
-            return S
+        start_day = Stock(stock_no).fetch(fetch_from[0], fetch_from[1])[0].date.day
+        start_datetime = datetime(fetch_from[0], fetch_from[1], start_day)
+        for idx, s in enumerate(S):
+            if s.date == start_datetime:
+                return S[idx:]
+        print("start date not found, re-fetch online...")
+        S = _get_twstock_online(stock_no, fetch_from, save=True)
+        return S
 
     else:
         print("no local date, fetch online...")
