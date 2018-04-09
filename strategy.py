@@ -32,7 +32,9 @@ class basic_strategy(bt.Strategy):
         self.DICross = bt.indicators.CrossOver(self.DIPlus, self.DIMinus)
         self.MACD = bt.talib.MACD(self.data)
         self.MACDCross = bt.indicators.CrossOver(self.MACD, 0.0)
-
+        self.FI = self.datas[0].FI
+        bt.indicators.SMA(self.data.FI, period=1, subplot=True)
+    
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
         # Buy/Sell order submitted/accepted to/by broker - Nothing to do
@@ -78,6 +80,7 @@ class basic_strategy(bt.Strategy):
 
         if self.order:
             return
+
         if 1.0 in self.DICross.get(size=5) and (self.ADX[0] - self.ADX[-2]) > 0:
             self.order = self.buy()
         if -1.0 in self.DICross.get(size=5) and (self.ADX[0] - self.ADX[-2]) > 0:

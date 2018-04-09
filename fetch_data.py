@@ -101,6 +101,7 @@ def _get_stock_pd_in_day(stock_no="0050", fetch_from=None):
     df = df.set_index("日期").apply(pd.to_numeric)
     df.columns = ['DI', 'Dealer', 'FI']
     S = pd.concat([S, df], axis=1)
+    S = S.dropna()
     return S
 
 def _get_stock_pd_in_week(stock_no="0050", fetch_from=None):
