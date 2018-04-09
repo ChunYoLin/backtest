@@ -5,8 +5,8 @@ import sys
 
 
 class myPandasData(bt.feeds.PandasData):
-    lines=('change',)
-    params = (('change', 8),)
+    lines=('change', 'DI', 'Dealer', 'FI')
+    params = (('change', 8), ('DI', 9), ('Dealer', 10), ('FI', 11))
 
 
 if __name__ == '__main__':
