@@ -24,17 +24,9 @@ class ADX_DI(bt.Indicator):
         self.lines.DIPlus = bt.indicators.PlusDirectionalIndicator(self.data, period=self.p.period)
         self.lines.DIMinus = bt.indicators.MinusDirectionalIndicator(self.data, period=self.p.period)
 
-class ChipDI(bt.Indicator):
-    lines = ('DI',)
-    def __init__(self):
-        self.lines.DI = self.datas[0].DI
+class ContinuousBool(bt.Indicator):
+    lines = ('ContinuousBool',)
+    params = (('period', 3), ('function', lambda x: x>0),)
 
-class ChipDealer(bt.Indicator):
-    lines = ('Dealer',)
-    def __init__(self):
-        self.lines.Dealer = self.datas[0].Dealer
-
-class ChipFI(bt.Indicator):
-    lines = ('FI',)
-    def __init__(self):
-        self.lines.FI = self.datas[0].FI
+    def next(self):
+        self.lines.ContinuousBool[0] = all(map(self.p.function, self.datas[0].get(size=self.p.period)))

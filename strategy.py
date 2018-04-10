@@ -57,6 +57,7 @@ class basicStrategy(bt.Strategy):
         self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
                 (trade.pnl, trade.pnlcomm), doprint=True)
 
+
 class myStrategy(basicStrategy):
     params = (
         ('exitbars', 5),
@@ -84,3 +85,20 @@ class myStrategy(basicStrategy):
             self.order = self.buy()
         if -1.0 in self.DICross.get(size=5) and (self.ADX[0] - self.ADX[-2]) > 0:
             self.order = self.sell()
+
+class ChipStrategy(basicStrategy):
+
+    def __init__(self):
+        self.order = None
+        self.FInv = self.datas[0].ForeignInvest
+        self.Finv_pos = ind.ContinuousBool(self.FInv, period=5)
+        self.Finv_neg = ind.ContinuousBool(self.FInv, function=lambda x: x<0)
+
+    def next(self):
+        if self.order:
+            return
+        if self.Finv_pos[0] == True:
+            self.order = self.buy()
+        if self.position:
+            if self.Finv_neg[0] == True:
+                self.order = self.close()
