@@ -9,7 +9,7 @@ import csv
 import os.path
 import sys
 
-from fetch_chip import _get_chip_info_pd
+from fetch_chip import _get_chip_info_pd_months
 
 
 database_path = "./database/"
@@ -70,19 +70,6 @@ def _get_stock_pd_in_day(stock_no="0050", fetch_from=None):
     S["weekday"] = S["date"].apply(lambda x: x.date().weekday())
     S = S.set_index("date").apply(pd.to_numeric)
     S["change"] = S["change"] / S["close"].shift(1)
-    start_date = S.index[0]
-    end_date = date.today()
-    daterange = pd.date_range(start_date, end_date, freq="M")
-    df = pd.DataFrame()
-    for single_date in daterange:
-        year = single_date.year
-        month = single_date.month
-        df = df.append(_get_chip_info_pd(stock_no, year-1911, month), ignore_index=True)
-    df = df.append(_get_chip_info_pd(stock_no, end_date.year-1911, end_date.month), ignore_index=True)
-    df = df.drop_duplicates()
-    df = df.set_index("日期").apply(pd.to_numeric)
-    df.columns = ['DomInvest', 'InvestTrust', 'ForeignInvest ']
-    S = pd.concat([S, df], axis=1)
     S = S.dropna()
     return S
 
@@ -105,22 +92,16 @@ def _stock_pd_resample(S, mode):
     S = S.dropna()
     return S
 
-def _get_stock_pd_in_week(stock_no="0050", fetch_from=None):
-    S_day = _get_stock_pd_in_day(stock_no, fetch_from)
-    S_week = _stock_pd_resample(S_day, "W")
-    return S_week
-
-def _get_stock_pd_in_month(stock_no="0050", fetch_from=None):
-    S_day = _get_stock_pd_in_day(stock_no, fetch_from)
-    S_month = _stock_pd_resample(S_day, "M")
-    return S_month
-
-
-def get_stock_pd(stock_no="0050", fetch_from=None, scale="day"):
-    if scale == "day":
-        return _get_stock_pd_in_day(stock_no, fetch_from)
+def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="day"):
+    S = _get_stock_pd_in_day(stock_no, fetch_from)
+    if chip:
+        start_date = S.index[0]
+        S_chip = _get_chip_info_pd_months(stock_no, start_date)
+        S = pd.concat([S, S_chip], axis=1)
+        S = S.dropna()
     if scale == "week":
-        return _get_stock_pd_in_week(stock_no, fetch_from)
+        S = _stock_pd_resample(S, "W")
     if scale == "month":
-        return _get_stock_pd_in_month(stock_no, fetch_from)
+        S = _stock_pd_resample(S, "M")
+    return S
 

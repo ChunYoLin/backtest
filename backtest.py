@@ -4,16 +4,20 @@ import backtrader as bt
 import sys
 
 
-class myPandasData(bt.feeds.PandasData):
-    lines=('change', 'DI', 'Dealer', 'FI')
-    params = (('change', 8), ('DI', 9), ('Dealer', 10), ('FI', 11))
+class PandasData_basic(bt.feeds.PandasData):
+    lines=('change',)
+    params = (('change', 8),)
+
+class PandasData_withchip(PandasData_basic):
+    lines=('DomInvest', 'InvestTrust', 'ForeignInvest')
+    params = (('DomInvest', 9), ('InvestTrust', 10), ('ForeignInvest', 11))
 
 
 if __name__ == '__main__':
     cerebro = bt.Cerebro()
 
     stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2015, 1), scale="day")
-    data =  myPandasData(
+    data = PandasData_basic(
             dataname=stock_pd, 
             volume='capacity',
             change='change'

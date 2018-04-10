@@ -23,8 +23,6 @@ class basic_strategy(bt.Strategy):
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
         self.order = None
-        self.buyprice = None
-        self.buycomm = None
         self.ADX_DI = ind.ADX_DI(self.data)
         self.ADX = self.ADX_DI.ADX
         self.DIPlus = self.ADX_DI.DIPlus
@@ -32,8 +30,6 @@ class basic_strategy(bt.Strategy):
         self.DICross = bt.indicators.CrossOver(self.DIPlus, self.DIMinus)
         self.MACD = bt.talib.MACD(self.data)
         self.MACDCross = bt.indicators.CrossOver(self.MACD, 0.0)
-        self.FI = self.datas[0].FI
-        bt.indicators.SMA(self.data.FI, period=1, subplot=True)
     
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -50,8 +46,6 @@ class basic_strategy(bt.Strategy):
                         order.executed.value,
                         order.executed.comm,),
                         doprint=True)
-                self.buyprice = order.executed.price
-                self.buycomm = order.executed.comm
 
             else:
                 self.log(
