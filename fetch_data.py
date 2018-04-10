@@ -1,18 +1,16 @@
 from collections import namedtuple
 from pandas import Series, DataFrame
 from twstock import Stock
-from twstock import chip
 import pandas as pd
 
 from datetime import datetime
 from datetime import date
-import requests
 import csv
 import os.path
 import sys
-import json
-import urllib.parse
-import sys
+
+from fetch_chip import _get_chip_info_pd
+
 
 database_path = "./database/"
 def _get_twstock_online(stock_no="0050", fetch_from=None, save=False):
@@ -65,22 +63,6 @@ def _get_twstock(stock_no="0050", fetch_from=None):
         S = _get_twstock_online(stock_no, fetch_from, save=True)
     return S
 
-    
-def _get_chip_info_pd(stock_no="0050", Year=None, month=None):
-    url = "https://stock.wearn.com/netbuy.asp?Year={}&month={:02d}&kind={}".format(int(Year), int(month), str(stock_no))
-    df = pd.read_html(url, skiprows=[-1, 0], header=0)[0]
-
-    def _dateplus1911(date):
-        tmp = date.split("/")
-        y = str(int(tmp[0]) + 1911)
-        m = tmp[1]
-        d = tmp[2]
-        return "{}/{}/{}".format(y, m, d)
-
-    df["日期"] = df["日期"].apply(lambda x: _dateplus1911(x))
-    df["日期"] = pd.to_datetime(df["日期"], format="%Y/%m/%d")
-    return df
-
 def _get_stock_pd_in_day(stock_no="0050", fetch_from=None):
     S = _get_twstock(stock_no, fetch_from)
     keys = list(S[0]._fields)
@@ -99,49 +81,38 @@ def _get_stock_pd_in_day(stock_no="0050", fetch_from=None):
     df = df.append(_get_chip_info_pd(stock_no, end_date.year-1911, end_date.month), ignore_index=True)
     df = df.drop_duplicates()
     df = df.set_index("日期").apply(pd.to_numeric)
-    df.columns = ['DI', 'Dealer', 'FI']
+    df.columns = ['DomInvest', 'InvestTrust', 'ForeignInvest ']
     S = pd.concat([S, df], axis=1)
+    S = S.dropna()
+    return S
+
+def _stock_pd_resample(S, mode):
+    S = S.resample(
+            mode, 
+            how=
+            {"capacity": 'sum',
+             "turnover": 'sum',   
+             "open": 'first',   
+             "high": 'max',
+             "low": 'min',
+             "close": 'last',
+             "change": 'sum',
+             "transaction": 'sum',
+             "DomInvest": 'sum',
+             "InvestTrust": 'sum',
+             "ForeignInvest": 'sum',
+            })
     S = S.dropna()
     return S
 
 def _get_stock_pd_in_week(stock_no="0050", fetch_from=None):
     S_day = _get_stock_pd_in_day(stock_no, fetch_from)
-    S_week = S_day.resample(
-            'W', 
-            how=
-            {"capacity": 'sum',
-             "turnover": 'sum',   
-             "open": 'first',   
-             "high": 'max',
-             "low": 'min',
-             "close": 'last',
-             "change": 'sum',
-             "transaction": 'sum',
-             "DI": 'sum',
-             "Dealer": 'sum',
-             "FI": 'sum',
-            })
-    S_week = S_week.dropna()
+    S_week = _stock_pd_resample(S_day, "W")
     return S_week
 
 def _get_stock_pd_in_month(stock_no="0050", fetch_from=None):
     S_day = _get_stock_pd_in_day(stock_no, fetch_from)
-    S_month = S_day.resample(
-            'M', 
-            how=
-            {"capacity": 'sum',
-             "turnover": 'sum',   
-             "open": 'first',   
-             "high": 'max',
-             "low": 'min',
-             "close": 'last',
-             "change": 'sum',
-             "transaction": 'sum',
-             "DI": 'sum',
-             "Dealer": 'sum',
-             "FI": 'sum',
-            })
-    S_month = S_month.dropna()
+    S_month = _stock_pd_resample(S_day, "M")
     return S_month
 
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import time
 import datetime
 import json
 import urllib.parse
@@ -153,7 +154,6 @@ class Stock(analytics.Analytics):
             self.raw_data.append(self.fetcher.fetch(year, month, self.sid))
             self.data.extend(self.raw_data[-1]['data'])
             if type(self.fetcher) is TWSEFetcher:
-                import time
                 time.sleep(3)
 
         return self.data

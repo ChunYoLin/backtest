@@ -26,5 +26,5 @@ if __name__ == '__main__':
     cerebro.addstrategy(basic_strategy)
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
     cerebro.run()
-    cerebro.plot()
+    #  cerebro.plot()
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
