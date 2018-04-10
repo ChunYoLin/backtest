@@ -24,14 +24,18 @@ def main():
             )
     
     cerebro.adddata(data)
-    cerebro.broker.setcash(100000.0)
+    cerebro.broker.setcash(1000000.0)
     cerebro.addsizer(bt.sizers.FixedSize, stake=1000)
     cerebro.broker.setcommission(commission=0.003)
     cerebro.addstrategy(ChipStrategy)
+    cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='trade')
+
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
-    cerebro.run()
-    cerebro.plot()
+    thestrats = cerebro.run()
+    thestrat = thestrats[0]
+    print('Sharpe Ratio:', thestrat.analyzers.trade.get_analysis())
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    #  cerebro.plot()
 
 if __name__ == '__main__':
     main()
