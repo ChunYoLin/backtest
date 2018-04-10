@@ -73,32 +73,35 @@ def _get_stock_pd_in_day(stock_no="0050", fetch_from=None):
     S = S.dropna()
     return S
 
-def _stock_pd_resample(S, mode):
-    S = S.resample(
-            mode, 
-            how=
-            {"capacity": 'sum',
-             "turnover": 'sum',   
-             "open": 'first',   
-             "high": 'max',
-             "low": 'min',
-             "close": 'last',
-             "change": 'sum',
-             "transaction": 'sum',
-             "DomInvest": 'sum',
-             "InvestTrust": 'sum',
-             "ForeignInvest": 'sum',
-            })
-    S = S.dropna()
-    return S
 
 def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="day"):
     S = _get_stock_pd_in_day(stock_no, fetch_from)
+
     if chip:
         start_date = S.index[0]
         S_chip = _get_chip_info_pd_months(stock_no, start_date)
         S = pd.concat([S, S_chip], axis=1)
         S = S.dropna()
+
+    def _stock_pd_resample(S, mode):
+        S = S.resample(
+                mode, 
+                how=
+                {"capacity": 'sum',
+                 "turnover": 'sum',   
+                 "open": 'first',   
+                 "high": 'max',
+                 "low": 'min',
+                 "close": 'last',
+                 "change": 'sum',
+                 "transaction": 'sum',
+                 "DomInvest": 'sum',
+                 "InvestTrust": 'sum',
+                 "ForeignInvest": 'sum',
+                })
+        S = S.dropna()
+        return S
+
     if scale == "week":
         S = _stock_pd_resample(S, "W")
     if scale == "month":
