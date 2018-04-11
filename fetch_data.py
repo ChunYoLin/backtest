@@ -1,81 +1,43 @@
-from collections import namedtuple
-from pandas import Series, DataFrame
-from twstock import Stock
+import numpy as np
 import pandas as pd
+from pandas import Series, DataFrame
+
+from fetch_dynamic import get_twstock
+from fetch_static import get_stock
+from fetch_chip import get_chip_info_pd_months
 
 from datetime import datetime
 from datetime import date
-import csv
-import os.path
-import sys
 
-from fetch_chip import _get_chip_info_pd_months
+basic_headers = ["date", "capacity", "turnover", "open" , "high", "low" , "close", "change", "transaction"]
 
+def _get_stock_pd_in_day(stock_no="0050", fetch_from=None, mode=""):
+    if mode == "dynamic":
+        S = get_twstock(stock_no, fetch_from)
+        keys = list(S[0]._fields)
+        S = DataFrame(S, columns=keys)    
+        S["change"] = S["change"] / S["close"].shift(1)
+    elif mode == "static":
+        start_year = fetch_from[0]
+        start_month = fetch_from[1]
+        S = DataFrame()
+        for year in range(start_year, 2018, 1):
+            stock = get_stock(stock_no, year)
+            if year == start_year:
+                stock = stock.loc[stock["年月日"].dt.month >= start_month]
+            S = pd.concat([S, stock])
+        S = S[["年月日", "成交量(千股)", "成交值(千元)", "開盤價(元)", "最高價(元)", "最低價(元)", "收盤價(元)", "報酬率％", "成交筆數(筆)"]]
+        S.columns = basic_headers
 
-database_path = "./database/"
-def _get_twstock_online(stock_no="0050", fetch_from=None, save=False):
-    S = Stock(stock_no)
-    if fetch_from:
-        S.fetch_from(fetch_from[0], fetch_from[1])
-    if save:
-        with open("{}/{}.csv".format(database_path, stock_no), 'w') as f:
-            w = csv.writer(f)
-            w.writerow(S.data[0]._fields)
-            w.writerows(data for data in S.data)
-    return S.data
-
-def _get_twstock_local(stock_no="0050"):
-    with open("{}/{}.csv".format(database_path, stock_no)) as infile:
-        reader = csv.reader(infile)
-        Datas = []
-        Data = namedtuple("Data", next(reader))
-        for data in map(Data._make, reader):
-            data = data._replace(date = datetime.strptime(data.date, "%Y-%m-%d %H:%M:%S"))
-            Datas.append(data)
-        return Datas
-
-def _get_twstock(stock_no="0050", fetch_from=None):
-    if fetch_from == None:
-        print("please specify the start date")
-        sys.exit(0)
-    if os.path.isfile("{}/{}.csv".format(database_path, stock_no)):
-        print("local data found!")
-        S =  _get_twstock_local(stock_no)
-        #  if data too old download it again
-        end_datetime = Stock(stock_no).date[-1]
-        local_end_datetime = S[-1].date
-        if local_end_datetime != end_datetime:
-            print("end date not found, re-fetch online...")
-            S = _get_twstock_online(stock_no, fetch_from, save=True)
-            return S
-        #  if data start date mismatched dowload it again
-        start_day = Stock(stock_no).fetch(fetch_from[0], fetch_from[1])[0].date.day
-        start_datetime = datetime(fetch_from[0], fetch_from[1], start_day)
-        for idx, s in enumerate(S):
-            if s.date == start_datetime:
-                return S[idx:]
-        print("start date not found, re-fetch online...")
-        S = _get_twstock_online(stock_no, fetch_from, save=True)
-        return S
-
-    else:
-        print("no local date, fetch online...")
-        S = _get_twstock_online(stock_no, fetch_from, save=True)
-    return S
-
-def _get_stock_pd_in_day(stock_no="0050", fetch_from=None):
-    S = _get_twstock(stock_no, fetch_from)
-    keys = list(S[0]._fields)
-    S = DataFrame(S, columns=keys)    
+    assert (sorted(S.columns.values.tolist()) == sorted(basic_headers))
     S["weekday"] = S["date"].apply(lambda x: x.date().weekday())
     S = S.set_index("date").apply(pd.to_numeric)
-    S["change"] = S["change"] / S["close"].shift(1)
     S = S.dropna()
+
     return S
 
-
-def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="day"):
-    S = _get_stock_pd_in_day(stock_no, fetch_from)
+def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="D", mode="dynamic"):
+    S = _get_stock_pd_in_day(stock_no, fetch_from, mode)
 
     if chip:
         start_date = S.index[0]
@@ -83,9 +45,9 @@ def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="day"):
         S = pd.concat([S, S_chip], axis=1)
         S = S.dropna()
 
-    def _stock_pd_resample(S, mode):
+    def _stock_pd_resample(S, scale):
         S = S.resample(
-                mode, 
+                scale, 
                 how=
                 {"capacity": 'sum',
                  "turnover": 'sum',   
@@ -102,9 +64,8 @@ def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="day"):
         S = S.dropna()
         return S
 
-    if scale == "week":
-        S = _stock_pd_resample(S, "W")
-    if scale == "month":
-        S = _stock_pd_resample(S, "M")
+    if scale != "D": 
+        S = _stock_pd_resample(S, scale)
+
     return S
 

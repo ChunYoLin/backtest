@@ -18,7 +18,7 @@ def _get_chip_info_pd(stock_no="0050", Year=None, month=None):
     df["日期"] = pd.to_datetime(df["日期"], format="%Y/%m/%d")
     return df
 
-def _get_chip_info_pd_months(stock_no="0050", start_date=None):
+def get_chip_info_pd_months(stock_no="0050", start_date=None):
     if start_date == None:
         print("please specify the start date")
         sys.exit(0)
