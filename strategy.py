@@ -90,15 +90,25 @@ class ChipStrategy(basicStrategy):
 
     def __init__(self):
         self.order = None
+
+        p = 5
+        self.dataclose = self.datas[0].close
+
+        self.volume = self.datas[0].volume
+        self.volume_ma = bt.indicators.SMA(self.volume, period=p, subplot=True)
+
         self.FInv = self.datas[0].ForeignInvest
-        self.Finv_pos = ind.ContinuousBool(self.FInv, period=5)
-        self.Finv_neg = ind.ContinuousBool(self.FInv, function=lambda x: x<0)
+        self.ITrust = self.datas[0].InvestTrust
+        self.DInv = self.datas[0].DomInvest
+        self.BigChip3 = self.FInv + self.ITrust + self.DInv
+        self.BigChip3_ma = bt.indicators.SMA(self.BigChip3, period=p, subplot=True)
 
     def next(self):
+        self.log("BigChip3: {}".format(self.BigChip3[0]), doprint=True)
         if self.order:
             return
-        if self.Finv_pos[0] == True:
+        if self.BigChip3_ma[0] > self.volume_ma*0.10:
             self.order = self.buy()
         if self.position:
-            if self.Finv_neg[0] == True:
+            if self.BigChip3_ma[0] < 0:
                 self.order = self.close()

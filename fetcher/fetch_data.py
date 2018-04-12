@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 from pandas import Series, DataFrame
 
-from fetch_dynamic import get_twstock
-from fetch_static import get_stock
-from fetch_chip import get_chip_info_pd_months
+from .fetch_dynamic import get_twstock
+from .fetch_static import get_stock
+from .fetch_chip import get_chip_info_pd_months
 
 from datetime import datetime
 from datetime import date
@@ -15,8 +15,8 @@ def _get_stock_pd_in_day(stock_no="0050", fetch_from=None, mode=""):
     if mode == "dynamic":
         S = get_twstock(stock_no, fetch_from)
         keys = list(S[0]._fields)
-        S = DataFrame(S, columns=keys)    
-        S["change"] = S["change"] / S["close"].shift(1)
+        S = DataFrame(S, columns=keys)   
+        S["capacity"] = S["capacity"].apply(pd.to_numeric)/1000.
     elif mode == "static":
         start_year = fetch_from[0]
         start_month = fetch_from[1]
@@ -32,6 +32,7 @@ def _get_stock_pd_in_day(stock_no="0050", fetch_from=None, mode=""):
     assert (sorted(S.columns.values.tolist()) == sorted(basic_headers))
     S["weekday"] = S["date"].apply(lambda x: x.date().weekday())
     S = S.set_index("date").apply(pd.to_numeric)
+    S["change"] = S["change"] / S["close"].shift(1)
     S = S.dropna()
 
     return S
@@ -41,7 +42,7 @@ def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="D", mode="
 
     if chip:
         start_date = S.index[0]
-        S_chip = _get_chip_info_pd_months(stock_no, start_date)
+        S_chip = get_chip_info_pd_months(stock_no, start_date)
         S = pd.concat([S, S_chip], axis=1)
         S = S.dropna()
 

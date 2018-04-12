@@ -23,7 +23,6 @@ def get_stock_all(year):
     stocks["年月日"] = pd.to_datetime(stocks["年月日"], format="%Y%m%d")
     stocks = stocks[stocks["年月日"].dt.year == int(year)]
     stocks.year = int(year)
-    stocks["本益比-TSE"] = pd.to_numeric(stocks["本益比-TSE"], errors='coerce')
     return stocks
 
 def get_stock(stock_no, year):

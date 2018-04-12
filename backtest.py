@@ -1,4 +1,4 @@
-from fetch_data import get_stock_pd
+from fetcher.fetch_data import get_stock_pd
 from strategy import myStrategy
 from strategy import ChipStrategy
 import backtrader as bt
@@ -14,13 +14,11 @@ class PandasDataWithChip(PandasDataBasic):
     params = (('DomInvest', 9), ('InvestTrust', 10), ('ForeignInvest', 11))
 
 def main():
-    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2010, 1), scale="D", chip=True, mode="static")
+    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2017, 1), scale="D", chip=True, mode="dynamic")
     data = PandasDataWithChip(
             dataname=stock_pd, 
             volume='capacity',
-            change='change'
             )
-
     cerebro = bt.Cerebro()
     cerebro.adddata(data)
     cerebro.broker.setcash(1000000.0)
@@ -28,12 +26,14 @@ def main():
     cerebro.broker.setcommission(commission=0.003)
     cerebro.addstrategy(ChipStrategy)
     cerebro.addanalyzer(bt.analyzers.SQN, _name='SQN')
+    cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='Trade')
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
     thestrats = cerebro.run()
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     thestrat = thestrats[0]
-    cerebro.plot()
     print(thestrat.analyzers.SQN.get_analysis())
+    print(thestrat.analyzers.Trade.get_analysis())
+    cerebro.plot()
 
 if __name__ == '__main__':
     main()
