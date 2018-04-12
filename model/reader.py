@@ -24,7 +24,7 @@ def _prepare_data(stock_pd, time_frame):
     y_train = result[:int(number_train), -1][:,2]
 
     x_test = result[int(number_train):, :-1]
-    y_test = result[int(number_train):, -1][:,-2]
+    y_test = result[int(number_train):, -1][:,2]
     
     x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], number_features))
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], number_features))
@@ -44,4 +44,4 @@ def gen_one_epoch(X, y, num_steps, batch_size):
         batch_X = X[j: j + batch_size]
         batch_y = y[j: j + batch_size]
         assert set(map(len, batch_X)) == {num_steps}
-        yield batch_X, batch_y
+        yield batch_X, batch_y.reshape(-1, 1)
