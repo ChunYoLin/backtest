@@ -4,13 +4,29 @@ import random
 
 import numpy as np
 import pandas as pd
+from sklearn import preprocessing
 
 
 random.seed(time.time())
 
+def _normalize(stock_pd):
+    min_max_scaler = preprocessing.MinMaxScaler()
+    stock_pd = stock_pd.apply(lambda x: min_max_scaler.fit_transform(x.values.reshape(-1, 1)).reshape(-1))
+    return stock_pd
+
+def denormalize(stock_pd, norm_value):
+    original_value = stock_pd['close'].values.reshape(-1,1)
+    norm_value = norm_value.reshape(-1,1)
+
+    min_max_scaler = preprocessing.MinMaxScaler()
+    min_max_scaler.fit_transform(original_value)
+    denorm_value = min_max_scaler.inverse_transform(norm_value)
+
+    return denorm_value
 
 def _prepare_data(stock_pd, time_frame):
     stock_pd = stock_pd[["open", "high", "close", "low", "capacity"]]
+    stock_pd = _normalize(stock_pd)
     number_features = len(stock_pd.columns)
     datavalue = stock_pd.as_matrix()
     result = []

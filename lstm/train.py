@@ -2,9 +2,9 @@ import sys, os
 sys.path.insert(0, os.path.abspath('..'))
 
 from fetcher.fetch_data import get_stock_pd
-from reader import _prepare_data, gen_one_epoch
-
-    
+from reader import _prepare_data, gen_one_epoch, denormalize
+import tensorflow as tf
+import numpy as np
 
 class RNNConfig():
     input_size=5
@@ -13,18 +13,17 @@ class RNNConfig():
     lstm_size=128
     num_layers=1
     keep_prob=0.8
-    batch_size = 64
+    batch_size = 32
     init_learning_rate = 0.001
     learning_rate_decay = 0.99
     init_epoch = 5
-    max_epoch = 100
+    max_epoch = 1000
 
 config = RNNConfig()
 
 S = get_stock_pd("3078", fetch_from=(2013, 1), scale="D", mode="dynamic")
 X_train, y_train, X_test, y_test = _prepare_data(S, config.num_steps)
 
-import tensorflow as tf
 lstm_graph = tf.Graph()
 with lstm_graph.as_default():
     inputs = tf.placeholder(tf.float32, [None, config.num_steps, config.input_size])
@@ -47,6 +46,7 @@ with lstm_graph.as_default():
     loss = tf.reduce_mean(tf.square(prediction - targets))
     optimizer = tf.train.RMSPropOptimizer(learning_rate)
     minimize = optimizer.minimize(loss)
+    saver = tf.train.Saver()
     with tf.Session(graph=lstm_graph) as sess:
         tf.global_variables_initializer().run()
         learning_rates_to_use = [
@@ -66,10 +66,13 @@ with lstm_graph.as_default():
                     learning_rate: current_lr
                     }
                 train_loss, pred, _ = sess.run([loss, prediction, minimize], train_data_feed)
+            if epoch_step % 10 == 0:
+                saver.save(sess, './model/simple-lstm', global_step=epoch_step)
             print("epoch: {}".format(epoch_step))
         test_data_feed = {
                 inputs: X_test,
                 }
         pred = sess.run([prediction], test_data_feed)
-        print(pred)
-        print(y_test)
+        pred = pred[0].reshape(-1)
+        print(denormalize(S, pred))
+        print(denormalize(S, y_test))
