@@ -25,7 +25,7 @@ def denormalize(stock_pd, norm_value):
     return denorm_value
 
 def _prepare_data(stock_pd, time_frame):
-    stock_pd = stock_pd[["open", "high", "close", "low", "capacity"]]
+    stock_pd = stock_pd[["open", "high", "close", "low", "capacity", "DomInvest", "InvestTrust", "ForeignInvest"]]
     stock_pd = _normalize(stock_pd)
     number_features = len(stock_pd.columns)
     datavalue = stock_pd.as_matrix()

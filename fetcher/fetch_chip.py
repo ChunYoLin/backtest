@@ -33,6 +33,6 @@ def get_chip_info_pd_months(stock_no="0050", start_date=None):
     df = df.append(_get_chip_info_pd(stock_no, end_date.year-1911, end_date.month), ignore_index=True)
     df = df.drop_duplicates()
     df = df.set_index("日期").apply(pd.to_numeric)
-    df.columns = ['DomInvest', 'InvestTrust', 'ForeignInvest ']
+    df.columns = ['DomInvest', 'InvestTrust', 'ForeignInvest']
     return df
     
