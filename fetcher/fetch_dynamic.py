@@ -4,12 +4,12 @@ from datetime import date
 import csv
 import os.path
 import sys
-
+sys.path.insert(0, os.path.abspath('..'))
 from twstock import Stock
 
 
 database_path = "/home/chunyo/work/backtest/database/"
-def _get_twstock_online(S, fetch_from=None, save=False):
+def _get_twstock_online(S, stock_no, fetch_from=None, save=False):
     if fetch_from:
         S.fetch_from(fetch_from[0], fetch_from[1])
     if save:
@@ -43,7 +43,7 @@ def get_twstock(stock_no="0050", fetch_from=None):
         local_end_datetime = S[-1].date
         if local_end_datetime != end_datetime:
             print("end date not found, re-fetch online...")
-            S = _get_twstock_online(_S, fetch_from, save=True)
+            S = _get_twstock_online(_S, stock_no, fetch_from, save=True)
             return S
         #  if data start date mismatched dowload it again
         start_day = _S.fetch(fetch_from[0], fetch_from[1])[0].date.day
@@ -52,11 +52,12 @@ def get_twstock(stock_no="0050", fetch_from=None):
             if s.date == start_datetime:
                 return S[idx:]
         print("start date not found, re-fetch online...")
-        S = _get_twstock_online(_S, fetch_from, save=True)
+        S = _get_twstock_online(_S, stock_no, fetch_from, save=True)
         return S
 
     else:
         print("no local data, fetch online...")
-        S = _get_twstock_online(_S, fetch_from, save=True)
+        S = _get_twstock_online(_S, stock_no, fetch_from, save=True)
     return S
+get_twstock("2367", fetch_from=(2013, 1))
 
