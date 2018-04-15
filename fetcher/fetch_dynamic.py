@@ -8,7 +8,7 @@ import sys
 from twstock import Stock
 
 
-database_path = "./database/"
+database_path = "/home/chunyo/work/backtest/database/"
 def _get_twstock_online(stock_no="0050", fetch_from=None, save=False):
     S = Stock(stock_no)
     if fetch_from:
