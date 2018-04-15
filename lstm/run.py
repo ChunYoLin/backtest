@@ -13,7 +13,7 @@ tf.app.flags.DEFINE_string("run_type", "train", "running type(train, test)")
 class RNNConfig():
     input_size=8
     output_size=1
-    num_steps=5
+    num_steps=20
     lstm_size=256
     num_layers=2
     keep_prob=1.0
@@ -22,17 +22,23 @@ class RNNConfig():
     init_epoch = 5
     max_epoch = 1000
 
+class DataConfig():
+    fetch_from=(2013, 1)
+    scale="D"
+    mode="dynamic"
+    chip=True
+    train_stocks = ["3078", "2454", "2367", "0050", "2330"]
+    test_stock="3078"
+
 def main():
     config = RNNConfig()
+    Dconfig = DataConfig()
 
-    stock_pd = get_stock_pd("3078", fetch_from=(2013, 1), scale="W", mode="static", chip=True)
-    X_train, y_train, X_test, y_test = _prepare_data(stock_pd, config.num_steps)
-
+    #  build graph
     lstm_graph = tf.Graph()
     with lstm_graph.as_default():
         inputs = tf.placeholder(tf.float32, [None, config.num_steps, config.input_size])
         targets = tf.placeholder(tf.float32, [None, config.output_size])
-
         def _create_one_cell():
             lstm_cell = tf.contrib.rnn.LSTMCell(config.lstm_size, state_is_tuple=True)
             if config.keep_prob < 1.0:
@@ -52,20 +58,40 @@ def main():
         prediction = tf.matmul(last, weight) + bias
         if FLAGS.run_type == "test":
             with tf.Session() as sess:
-                saver = tf.train.Saver()
-                saver.restore(sess, './model/simple-lstm.ckpt')
+                #  get data
+                stock_pd = get_stock_pd(Dconfig.test_stock, fetch_from=Dconfig.fetch_from, scale=Dconfig.scale, mode=Dconfig.mode, chip=Dconfig.chip)
+                X_train, y_train, X_test, y_test = _prepare_data(stock_pd, config.num_steps)
                 test_data_feed = {
                         inputs: X_test,
                         }
+                #  restore from saved model
+                saver = tf.train.Saver()
+                saver.restore(sess, './model/simple-lstm.ckpt')
+                #  inference 
                 pred = sess.run([prediction], test_data_feed)
                 pred = pred[0].reshape(-1)
                 denorm_pred = denormalize(stock_pd, pred)
                 denorm_ytest = denormalize(stock_pd, y_test)
+                error = np.linalg.norm(denorm_pred-denorm_ytest)
+                print("2 norm distance: {}".format(error))
                 plt.plot(denorm_pred,color='red', label='Prediction')
                 plt.plot(denorm_ytest,color='blue', label='Answer')
                 plt.legend(loc='best')
                 plt.show()
         else:
+            #  get data
+            X_train = None
+            y_train = None
+            for stock_no in Dconfig.train_stocks:
+                stock_pd = get_stock_pd(stock_no, fetch_from=Dconfig.fetch_from, scale=Dconfig.scale, mode=Dconfig.mode, chip=Dconfig.chip)
+                data = _prepare_data(stock_pd, config.num_steps)
+                if X_train is None:
+                    X_train = data[0]
+                    y_train = data[1]
+                else:
+                    X_train = np.concatenate((X_train, data[0]))
+                    y_train = np.concatenate((y_train, data[1]))
+            #  train
             saver = tf.train.Saver()
             loss = tf.reduce_mean(tf.square(prediction - targets))
             optimizer = tf.train.AdamOptimizer(config.learning_rate)
