@@ -14,7 +14,7 @@ class PandasDataWithChip(PandasDataBasic):
     params = (('DomInvest', 9), ('InvestTrust', 10), ('ForeignInvest', 11))
 
 def main():
-    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2017, 1), scale="D", chip=True, mode="dynamic")
+    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2013, 1), scale="D", chip=True, mode="dynamic")
     data = PandasDataWithChip(
             dataname=stock_pd, 
             volume='capacity',

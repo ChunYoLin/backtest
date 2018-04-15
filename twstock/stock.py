@@ -8,6 +8,7 @@ from collections import namedtuple
 import sys
 
 import requests
+from .tor import change_ip
 
 try:
     from . import analytics
@@ -154,7 +155,7 @@ class Stock(analytics.Analytics):
             self.raw_data.append(self.fetcher.fetch(year, month, self.sid))
             self.data.extend(self.raw_data[-1]['data'])
             if type(self.fetcher) is TWSEFetcher:
-                time.sleep(3)
+                change_ip()
 
         return self.data
 
