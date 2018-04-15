@@ -47,7 +47,8 @@ class TWSEFetcher(BaseFetcher):
 
     def fetch(self, year: int, month: int, sid: str, retry=5):
         params = {'date': '%d%02d01' % (year, month), 'stockNo': sid}
-        r = requests.get(self.REPORT_URL, params=params)
+        session = change_ip()
+        r = session.get(self.REPORT_URL, params=params)
         if sys.version_info < (3, 5):
             try:
                 data = r.json()
@@ -154,8 +155,6 @@ class Stock(analytics.Analytics):
         for year, month in self._month_year_iter(month, year, today.month, today.year):
             self.raw_data.append(self.fetcher.fetch(year, month, self.sid))
             self.data.extend(self.raw_data[-1]['data'])
-            if type(self.fetcher) is TWSEFetcher:
-                change_ip()
 
         return self.data
 

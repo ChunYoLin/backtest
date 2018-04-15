@@ -31,6 +31,7 @@ def _get_twstock_local(stock_no="0050"):
         return Datas
 
 def get_twstock(stock_no="0050", fetch_from=None):
+    print("get stock: {}".format(stock_no))
     if fetch_from == None:
         print("please specify the start date")
         sys.exit(0)
@@ -55,7 +56,7 @@ def get_twstock(stock_no="0050", fetch_from=None):
         return S
 
     else:
-        print("no local date, fetch online...")
+        print("no local data, fetch online...")
         S = _get_twstock_online(stock_no, fetch_from, save=True)
     return S
 

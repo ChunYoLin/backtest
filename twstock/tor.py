@@ -1,4 +1,3 @@
-import time
 import requests
 from stem import Signal
 from stem.control import Controller
@@ -18,7 +17,7 @@ def renew_connection():
         controller.authenticate()
         controller.signal(Signal.NEWNYM)
 
-
 def change_ip():
     session = get_tor_session()
     renew_connection()
+    return session
