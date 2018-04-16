@@ -167,8 +167,8 @@ class Stock(analytics.Analytics):
             self.raw_data.append(self.fetcher.fetch(year, month, self.sid))
             self.data.extend(self.raw_data[-1]['data'])
             iter_time += 1
-            #  if iter_time%5 == 0 and type(self.fetcher) == TWSEFetcher:
-                #  time.sleep(20)
+            if iter_time%20 == 0 and type(self.fetcher) == TWSEFetcher:
+                self.fetcher.change_ip()
             bar.next()
         bar.finish()
 
