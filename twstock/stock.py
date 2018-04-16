@@ -8,7 +8,8 @@ from collections import namedtuple
 import sys
 
 import requests
-from .tor import change_ip
+from .tor import get_tor_session, renew_connection
+from torrequest import TorRequest
 
 try:
     from . import analytics
@@ -16,6 +17,8 @@ try:
 except ImportError:
     import analytics
     from codes import codes
+
+from progress.bar import Bar
 
 
 TWSE_BASE_URL = 'http://www.twse.com.tw/'
@@ -43,12 +46,16 @@ class TWSEFetcher(BaseFetcher):
     REPORT_URL = urllib.parse.urljoin(TWSE_BASE_URL, 'exchangeReport/STOCK_DAY')
 
     def __init__(self):
-        pass
+        self.session = get_tor_session()
+
+    def change_ip(self):
+        renew_connection()
+        self.session = get_tor_session()
 
     def fetch(self, year: int, month: int, sid: str, retry=5):
         params = {'date': '%d%02d01' % (year, month), 'stockNo': sid}
-        session = change_ip()
-        r = session.get(self.REPORT_URL, params=params)
+        r = self.session.get(self.REPORT_URL, params=params)
+
         if sys.version_info < (3, 5):
             try:
                 data = r.json()
@@ -61,7 +68,8 @@ class TWSEFetcher(BaseFetcher):
                 data = r.json()
             except json.decoder.JSONDecodeError:
                 if retry:
-                    return self.fetch(year, month, sid, retry - 1)
+                    self.change_ip()
+                    return self.fetch(year, month, sid, retry - 0)
                 data = {'stat': '', 'data': []}
 
         if data['stat'] == 'OK':
@@ -152,9 +160,17 @@ class Stock(analytics.Analytics):
         self.raw_data = []
         self.data = []
         today = datetime.datetime.today()
+        length = sum(1 for _, _ in self._month_year_iter(month, year, today.month, today.year))
+        bar = Bar('Processing', max=length)
+        iter_time = 0
         for year, month in self._month_year_iter(month, year, today.month, today.year):
             self.raw_data.append(self.fetcher.fetch(year, month, self.sid))
             self.data.extend(self.raw_data[-1]['data'])
+            iter_time += 1
+            #  if iter_time%5 == 0 and type(self.fetcher) == TWSEFetcher:
+                #  time.sleep(20)
+            bar.next()
+        bar.finish()
 
         return self.data
 

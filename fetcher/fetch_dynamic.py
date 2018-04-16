@@ -59,5 +59,3 @@ def get_twstock(stock_no="0050", fetch_from=None):
         print("no local data, fetch online...")
         S = _get_twstock_online(_S, stock_no, fetch_from, save=True)
     return S
-get_twstock("2367", fetch_from=(2013, 1))
-
