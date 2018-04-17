@@ -1,5 +1,5 @@
 import sys, os
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../../'))
 from fetcher.fetch_data import get_stock_pd
 from reader import _prepare_data, gen_one_epoch, denormalize
 import tensorflow as tf
@@ -77,7 +77,7 @@ def main():
                 plt.plot(denorm_pred,color='red', label='Prediction')
                 plt.plot(denorm_ytest,color='blue', label='Answer')
                 plt.legend(loc='best')
-                plt.show()
+                #  plt.show()
         else:
             #  get data
             X_train = None

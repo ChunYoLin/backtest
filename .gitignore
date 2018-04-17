@@ -2,3 +2,4 @@ database/
 static_database/
 __pycache__/
 *.csv
+model/
