@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.abspath('..'))
 from twstock import Stock
 
 
-database_path = "/home/chunyo/work/backtest/database/"
+database_path = "/home/jeff/work/backtest/database/"
 def _get_twstock_online(S, stock_no, fetch_from=None, save=False):
     if fetch_from:
         S.fetch_from(fetch_from[0], fetch_from[1])

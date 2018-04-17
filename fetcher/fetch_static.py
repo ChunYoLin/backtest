@@ -8,7 +8,7 @@ from datetime import date
 
 #  get stocks pd
 def get_stock_all(year):
-    db_path = "/home/chunyo/work/backtest/static_database/"
+    db_path = "/home/jeff/work/backtest/static_database/"
     start = 0
     end = 0
     for csvfile in os.listdir(db_path):
