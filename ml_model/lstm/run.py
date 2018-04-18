@@ -20,7 +20,7 @@ class RNNConfig():
     batch_size = 128
     learning_rate = 0.001
     init_epoch = 5
-    max_epoch = 1000
+    max_epoch = 100000
 
 class DataConfig():
     fetch_from=(2013, 1)
@@ -77,8 +77,8 @@ def main():
                 plt.plot(denorm_pred,color='red', label='Prediction')
                 plt.plot(denorm_ytest,color='blue', label='Answer')
                 plt.legend(loc='best')
-                #  plt.show()
-        else:
+                plt.show()
+        elif FLAGS.run_type == "train":
             #  get data
             X_train = None
             y_train = None
@@ -98,12 +98,13 @@ def main():
             minimize = optimizer.minimize(loss)
             with tf.Session(graph=lstm_graph) as sess:
                 tf.global_variables_initializer().run()
-                #  saver.restore(sess, './model/simple-lstm.ckpt')
+                saver.restore(sess, './model/simple-lstm.ckpt')
                 for epoch_step in range(config.max_epoch):
                     mean_loss = 0.
                     # Check https://github.com/lilianweng/stock-rnn/blob/master/data_wrapper.py
                     # if you are curious to know what is StockDataSet and how generate_one_epoch() 
                     # is implemented.
+                    t = 0
                     for batch_X, batch_y in gen_one_epoch(X_train, y_train, config.num_steps, config.batch_size):
                         train_data_feed = {
                             inputs: batch_X, 
@@ -111,9 +112,10 @@ def main():
                             }
                         train_loss, _ = sess.run([loss, minimize], train_data_feed)
                         mean_loss += train_loss
+                        t += 1
                     if epoch_step % 10 == 0:
                         saver.save(sess, './model/simple-lstm.ckpt')
-                    print("epoch: {}, loss: {}".format(epoch_step, mean_loss/len(batch_X)))
+                    print("epoch: {}, loss: {}".format(epoch_step, mean_loss/t))
 
 if __name__ == '__main__':
     main()

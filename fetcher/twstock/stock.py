@@ -54,23 +54,28 @@ class TWSEFetcher(BaseFetcher):
 
     def fetch(self, year: int, month: int, sid: str, retry=5):
         params = {'date': '%d%02d01' % (year, month), 'stockNo': sid}
-        r = self.session.get(self.REPORT_URL, params=params)
 
-        if sys.version_info < (3, 5):
-            try:
-                data = r.json()
-            except ValueError:
-                if retry:
-                    return self.fetch(year, month, sid, retry - 1)
-                data = {'stat': '', 'data': []}
-        else:
-            try:
-                data = r.json()
-            except json.decoder.JSONDecodeError:
-                if retry:
-                    self.change_ip()
-                    return self.fetch(year, month, sid, retry - 0)
-                data = {'stat': '', 'data': []}
+        try: 
+            r = self.session.get(self.REPORT_URL, params=params)
+            if sys.version_info < (3, 5):
+                try:
+                    data = r.json()
+                except ValueError:
+                    if retry:
+                        return self.fetch(year, month, sid, retry - 1)
+                    data = {'stat': '', 'data': []}
+            else:
+                try:
+                    data = r.json()
+                except json.decoder.JSONDecodeError:
+                    if retry:
+                        self.change_ip()
+                        return self.fetch(year, month, sid, retry - 0)
+                    data = {'stat': '', 'data': []}
+        except requests.exceptions.ConnectionError:
+            self.change_ip()
+            return self.fetch(year, month, sid, retry - 0)
+
 
         if data['stat'] == 'OK':
             data['data'] = self.purify(data)
