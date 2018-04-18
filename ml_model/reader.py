@@ -49,7 +49,7 @@ def _prepare_data(stock_pd, time_frame):
 
 
 def gen_one_epoch(X, y, num_steps, batch_size):
-    num_batches = int(len(X)//batch_size)
+    num_batches = int(len(X))//batch_size
     #  if batch_size * num_batches < len(X):
         #  num_batches += 1
 
@@ -57,7 +57,7 @@ def gen_one_epoch(X, y, num_steps, batch_size):
     random.shuffle(batch_indices)
 
     for j in batch_indices:
-        batch_X = X[j: j + batch_size]
-        batch_y = y[j: j + batch_size]
+        batch_X = X[j * batch_size: (j+1) * batch_size]
+        batch_y = y[j * batch_size: (j+1) * batch_size]
         assert set(map(len, batch_X)) == {num_steps}
         yield batch_X, batch_y.reshape(-1, 1)

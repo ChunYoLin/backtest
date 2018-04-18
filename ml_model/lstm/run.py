@@ -28,6 +28,7 @@ class DataConfig():
     mode="dynamic"
     chip=True
     train_stocks = ["3078", "2454", "2367", "0050", "2330"]
+    train_stocks = ["3078"]
     test_stock="3078"
 
 def main():
@@ -98,7 +99,7 @@ def main():
             minimize = optimizer.minimize(loss)
             with tf.Session(graph=lstm_graph) as sess:
                 tf.global_variables_initializer().run()
-                saver.restore(sess, './model/simple-lstm.ckpt')
+                #  saver.restore(sess, './model/simple-lstm.ckpt')
                 for epoch_step in range(config.max_epoch):
                     mean_loss = 0.
                     # Check https://github.com/lilianweng/stock-rnn/blob/master/data_wrapper.py
