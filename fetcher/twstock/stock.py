@@ -9,7 +9,6 @@ import sys
 
 import requests
 from .tor import get_tor_session, renew_connection
-from torrequest import TorRequest
 
 try:
     from . import analytics
