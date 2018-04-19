@@ -1,6 +1,6 @@
 from fetcher.fetch_data import get_stock_pd
-from strategy import myStrategy
-from strategy import ChipStrategy
+from libs.strategy import myStrategy
+from libs.strategy import ChipStrategy
 import backtrader as bt
 import sys
 

@@ -1,4 +1,4 @@
-import indicator as ind
+from . import indicator as ind
 
 # Import the backtrader platform
 import backtrader as bt
