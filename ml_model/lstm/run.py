@@ -27,8 +27,7 @@ class DataConfig():
     scale="D"
     mode="dynamic"
     chip=True
-    train_stocks = ["3078", "2454", "2367", "0050", "2330"]
-    train_stocks = ["3078"]
+    train_stocks = ["3078", "2454", "2367", "0050", "2330", "2317", "4919"]
     test_stock="3078"
 
 def main():
@@ -41,7 +40,7 @@ def main():
         inputs = tf.placeholder(tf.float32, [None, config.num_steps, config.input_size])
         targets = tf.placeholder(tf.float32, [None, config.output_size])
         def _create_one_cell():
-            lstm_cell = tf.contrib.rnn.LSTMCell(config.lstm_size, state_is_tuple=True)
+            lstm_cell = tf.contrib.rnn.LayerNormBasicLSTMCell(config.lstm_size)
             if config.keep_prob < 1.0:
                 lstm_cell = tf.contrib.rnn.DropoutWrapper(lstm_cell, output_keep_prob=config.keep_prob)
             return lstm_cell
