@@ -11,9 +11,9 @@ from datetime import date
 
 basic_headers = ["date", "capacity", "turnover", "open" , "high", "low" , "close", "change", "transaction"]
 
-def _get_stock_pd_in_day(stock_no="0050", fetch_from=None, mode=""):
+def _get_stock_pd_in_day(stock_no="0050", fetch_from=None, mode="", update=False):
     if mode == "dynamic":
-        S = get_twstock(stock_no, fetch_from)
+        S = get_twstock(stock_no, fetch_from, False)
         keys = list(S[0]._fields)
         S = DataFrame(S, columns=keys)   
         S["capacity"] = S["capacity"].apply(pd.to_numeric)/1000.
@@ -37,7 +37,7 @@ def _get_stock_pd_in_day(stock_no="0050", fetch_from=None, mode=""):
 
     return S
 
-def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="D", mode="dynamic"):
+def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="D", mode="dynamic", update=False):
     S = _get_stock_pd_in_day(stock_no, fetch_from, mode)
 
     if chip:

@@ -29,7 +29,7 @@ def _get_twstock_local(stock_no="0050"):
             Datas.append(data)
         return Datas
 
-def get_twstock(stock_no="0050", fetch_from=None):
+def get_twstock(stock_no="0050", fetch_from=None, update=False):
     print("get stock: {}".format(stock_no))
     if fetch_from == None:
         print("please specify the start date")
@@ -38,13 +38,14 @@ def get_twstock(stock_no="0050", fetch_from=None):
     if os.path.isfile("{}/{}.csv".format(database_path, stock_no)):
         print("local data found!")
         S =  _get_twstock_local(stock_no)
-        #  if data too old download it again
-        end_datetime = _S.date[-1]
-        local_end_datetime = S[-1].date
-        if local_end_datetime != end_datetime:
-            print("end date not found, re-fetch online...")
-            S = _get_twstock_online(_S, stock_no, fetch_from, save=True)
-            return S
+        if update == True:
+            #  if data too old download it again
+            end_datetime = _S.date[-1]
+            local_end_datetime = S[-1].date
+            if local_end_datetime != end_datetime:
+                print("end date not found, re-fetch online...")
+                S = _get_twstock_online(_S, stock_no, fetch_from, save=True)
+                return S
         #  if data start date mismatched dowload it again
         start_day = _S.fetch(fetch_from[0], fetch_from[1])[0].date.day
         start_datetime = datetime(fetch_from[0], fetch_from[1], start_day)
