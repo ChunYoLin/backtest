@@ -13,7 +13,7 @@ basic_headers = ["date", "capacity", "turnover", "open" , "high", "low" , "close
 
 def _get_stock_pd_in_day(stock_no="0050", fetch_from=None, mode="", update=False):
     if mode == "dynamic":
-        S = get_twstock(stock_no, fetch_from, False)
+        S = get_twstock(stock_no, fetch_from, update)
         keys = list(S[0]._fields)
         S = DataFrame(S, columns=keys)   
         S["capacity"] = S["capacity"].apply(pd.to_numeric)/1000.
@@ -38,7 +38,7 @@ def _get_stock_pd_in_day(stock_no="0050", fetch_from=None, mode="", update=False
     return S
 
 def get_stock_pd(stock_no="0050", fetch_from=None, chip=False, scale="D", mode="dynamic", update=False):
-    S = _get_stock_pd_in_day(stock_no, fetch_from, mode)
+    S = _get_stock_pd_in_day(stock_no, fetch_from, mode, update)
 
     if chip:
         start_date = S.index[0]

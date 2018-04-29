@@ -14,7 +14,7 @@ class PandasDataWithChip(PandasDataBasic):
     params = (('DomInvest', 9), ('InvestTrust', 10), ('ForeignInvest', 11))
 
 def main():
-    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2013, 1), scale="D", chip=True, mode="dynamic")
+    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2013, 1), scale="D", chip=True, mode="dynamic", update=True)
     data = PandasDataWithChip(
             dataname=stock_pd, 
             volume='capacity',
@@ -26,13 +26,13 @@ def main():
     cerebro.broker.setcommission(commission=0.003)
     cerebro.addstrategy(ChipStrategy)
     cerebro.addanalyzer(bt.analyzers.SQN, _name='SQN')
-    cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='Trade')
+    #  cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='Trade')
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
     thestrats = cerebro.run()
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     thestrat = thestrats[0]
     print(thestrat.analyzers.SQN.get_analysis())
-    print(thestrat.analyzers.Trade.get_analysis())
+    #  print(thestrat.analyzers.Trade.get_analysis())
     cerebro.plot()
 
 if __name__ == '__main__':
