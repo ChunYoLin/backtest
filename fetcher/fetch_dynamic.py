@@ -5,7 +5,7 @@ import csv
 import os.path
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-from twstock import Stock
+from fetcher.twstock import Stock
 
 
 database_path = "./fetcher/database"

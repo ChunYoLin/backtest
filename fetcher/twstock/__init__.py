@@ -1,14 +1,14 @@
 """Taiwan Stock Opendata with realtime - twstock"""
 
-from twstock import stock
-from twstock import analytics
-from twstock import cli
-from twstock import mock
-from twstock import realtime
+from fetcher.twstock import stock
+from fetcher.twstock import analytics
+from fetcher.twstock import cli
+from fetcher.twstock import mock
+from fetcher.twstock import realtime
 
-from twstock.analytics import BestFourPoint
-from twstock.codes import twse, tpex, codes
-from twstock.stock import Stock
+from fetcher.twstock.analytics import BestFourPoint
+from fetcher.twstock.codes import twse, tpex, codes
+from fetcher.twstock.stock import Stock
 
 
 __version__ = '1.1.0'

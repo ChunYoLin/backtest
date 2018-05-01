@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from twstock.cli import best_four_point
-from twstock.cli import stock
-from twstock.cli import realtime
+from fetcher.twstock.cli import best_four_point
+from fetcher.twstock.cli import stock
+from fetcher.twstock.cli import realtime
 
 
 def run():
