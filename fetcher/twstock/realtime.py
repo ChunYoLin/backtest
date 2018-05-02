@@ -4,7 +4,7 @@ import datetime
 import json
 import time
 import requests
-import twstock
+import fetcher.twstock
 import sys
 
 

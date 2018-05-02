@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import twstock
+import fetcher.twstock
 
 
 def run(argv):

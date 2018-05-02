@@ -2,7 +2,7 @@
 
 import io
 import sys
-import twstock
+import fetcher.twstock
 
 # XXX: Repalce sys.stdout prevent Windows UnicodeEncodeError on cmd.exe
 stdout = io.TextIOWrapper(
