@@ -8,8 +8,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 def main():
-    bfxfetcher = BfxFetcher('BTC/USD', '1h')
-    bfxfetcher.fetch_from(datetime(2018, 5, 1))
+    bfxfetcher = BfxFetcher('BTC/USD', '30m')
+    bfxfetcher.fetch_from(datetime(2018, 3, 1))
     data = bfxfetcher.data
     header = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']
     data_pd = pd.DataFrame(data, columns=header)

@@ -58,7 +58,7 @@ class BfxFetcher(object):
             try:
 
                 print(self.exchange.milliseconds(), 'Fetching candles starting from', self.exchange.iso8601(from_timestamp))
-                ohlcvs = self.exchange.fetch_ohlcv(self.symbol, self.timescale, from_timestamp)
+                ohlcvs = self.exchange.fetch_ohlcv(self.symbol, self.timescale, from_timestamp, limit=1000)
                 print(self.exchange.milliseconds(), 'Fetched', len(ohlcvs), 'candles')
                 first = ohlcvs[0][0]
                 last = ohlcvs[-1][0]
