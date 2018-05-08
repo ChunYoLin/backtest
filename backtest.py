@@ -1,5 +1,5 @@
 from BitFetcher.bitfinex import BfxFetcher
-from libs.ccxt_startegy import S
+from libs.ccxt_startegy import MaCross
 
 import backtrader as bt
 import ccxt
@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 def main():
     bfxfetcher = BfxFetcher('BTC/USD', '30m')
-    bfxfetcher.fetch_from(datetime(2018, 3, 1))
+    bfxfetcher.fetch_from(datetime(2018, 1, 1))
     data = bfxfetcher.data
     header = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']
     data_pd = pd.DataFrame(data, columns=header)
@@ -29,7 +29,7 @@ def main():
     cerebro.broker.setcash(100000.0)
     cerebro.broker.setcommission(commission=0.003)
     cerebro.addsizer(bt.sizers.FixedSize, stake=1)
-    cerebro.addstrategy(S)
+    cerebro.addstrategy(MaCross)
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
     thestrats = cerebro.run()
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
