@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 def main():
     bfxfetcher = BfxFetcher('BTC/USD', '30m')
-    bfxfetcher.fetch_from(datetime(2018, 1, 1))
+    bfxfetcher.fetch_from(datetime(2018, 5, 1))
     data = bfxfetcher.data
     header = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']
     data_pd = pd.DataFrame(data, columns=header)
@@ -28,7 +28,11 @@ def main():
     cerebro.adddata(datafeed)
     cerebro.broker.setcash(100000.0)
     cerebro.broker.setcommission(commission=0.003)
-    cerebro.addsizer(bt.sizers.FixedSize, stake=1)
+    #  cerebro.addsizer(bt.sizers.FixedSize, stake=1)
+    #  strats = cerebro.optstrategy(
+            #  MaCross,
+            #  fast=range(13, 16),
+            #  slow=range(50, 61))
     cerebro.addstrategy(MaCross)
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
     thestrats = cerebro.run()

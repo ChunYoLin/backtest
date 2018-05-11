@@ -46,7 +46,7 @@ class basicStrategy(bt.Strategy):
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
+            self.log('Order Canceled/Margin/Rejected', True)
 
         # Write down: no pending order
         self.order = None
@@ -55,7 +55,7 @@ class basicStrategy(bt.Strategy):
         if not trade.isclosed:
             return
         self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
-                (trade.pnl, trade.pnlcomm), doprint=True)
+                (trade.pnl, trade.pnlcomm), doprint=False)
 
 
 class myStrategy(basicStrategy):
