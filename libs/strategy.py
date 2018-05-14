@@ -34,7 +34,7 @@ class basicStrategy(bt.Strategy):
                        (order.executed.price,
                         order.executed.value,
                         order.executed.comm,),
-                        doprint=True)
+                        doprint=False)
 
             else:
                 self.log(
@@ -42,7 +42,7 @@ class basicStrategy(bt.Strategy):
                        (order.executed.price,
                         order.executed.value,
                         order.executed.comm),
-                        doprint=True)
+                        doprint=False)
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:

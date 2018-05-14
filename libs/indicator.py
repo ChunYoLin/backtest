@@ -30,3 +30,9 @@ class ContinuousBool(bt.Indicator):
 
     def next(self):
         self.lines.ContinuousBool[0] = all(map(self.p.function, self.datas[0].get(size=self.p.period)))
+
+class ForceIndex(bt.Indicator):
+    lines = ('ForceIndex', )
+    
+    def next(self):
+        self.lines.ForceIndex[0] = (self.data.close[0]-self.data.close[-1])/(self.data.volume[0] + 0.00000001)
