@@ -112,3 +112,21 @@ class ChipStrategy(basicStrategy):
         if self.position:
             if self.BigChip3_ma[0] < 0:
                 self.order = self.close()
+
+class TrendTracking(basicStrategy):
+
+    def __init__(self):
+        self.order = None
+        self.dataclose = self.datas[0].close
+
+    def next(self):
+        if self.order:
+            return
+        if not self.position:
+            if len(self.dataclose.get(size=20)) > 0:
+                if self.dataclose[0] == max(self.dataclose.get(size=20)):
+                    self.buy()
+        else: 
+            if self.dataclose[0] == min(self.dataclose.get(size=10)):
+                self.sell()
+

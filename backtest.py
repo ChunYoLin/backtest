@@ -1,6 +1,7 @@
 from fetcher.fetch_data import get_stock_pd
 from libs.strategy import myStrategy
 from libs.strategy import ChipStrategy
+from libs.strategy import TrendTracking
 import backtrader as bt
 import sys
 
@@ -14,7 +15,7 @@ class PandasDataWithChip(PandasDataBasic):
     params = (('DomInvest', 9), ('InvestTrust', 10), ('ForeignInvest', 11))
 
 def main():
-    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2013, 1), scale="D", chip=True, mode="dynamic", update=True)
+    stock_pd = get_stock_pd(sys.argv[1], fetch_from=(2008, 1), scale="D", chip=True, mode="dynamic", update=True)
     data = PandasDataWithChip(
             dataname=stock_pd, 
             volume='capacity',
@@ -24,7 +25,7 @@ def main():
     cerebro.broker.setcash(1000000.0)
     cerebro.addsizer(bt.sizers.FixedSize, stake=1000)
     cerebro.broker.setcommission(commission=0.003)
-    cerebro.addstrategy(ChipStrategy)
+    cerebro.addstrategy(TrendTracking)
     cerebro.addanalyzer(bt.analyzers.SQN, _name='SQN')
     #  cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='Trade')
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())

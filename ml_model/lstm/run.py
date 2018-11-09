@@ -27,7 +27,8 @@ class DataConfig():
     scale="D"
     mode="dynamic"
     chip=True
-    train_stocks = ["3078", "2454", "2367", "0050", "2330", "2317", "4919"]
+    #  train_stocks = ["3078", "2454", "2367", "0050", "2330", "2317", "4919"]
+    train_stocks = ["3078"]
     test_stock="3078"
 
 def main():
