@@ -35,6 +35,7 @@ class MaCross(basicStrategy):
         self.DIPlus = self.ADX_DI.DIPlus
         self.DIMinus = self.ADX_DI.DIMinus
         self.FI = ind.ForceIndex(self.data)
+        self.FI2 = bt.indicators.EMA(self.FI, period=2)
         self.FI13 = bt.indicators.EMA(self.FI, period=13)
 
     def next(self):
@@ -52,9 +53,15 @@ class MaCross(basicStrategy):
         crossover_pos_in_period = 1.0 in self.crossover.get(size=5) 
         crossover_neg_in_period = -1.0 in self.crossover.get(size=5)
         if not self.position:
-            if crossover_pos_in_period and self.volume[0] > self.volume_ma[0] and ADX_slope_positive and DIP_slope_positive:
+            if (crossover_pos_in_period and 
+                    self.volume[0] > self.volume_ma[0] and 
+                    ADX_slope_positive and
+                    DIP_slope_positive):
                 self.order = self.buy()
-            if crossover_neg_in_period and ADX_slope_positive and DIM_slope_positive:
+            if (crossover_neg_in_period and 
+                    self.volume[0] > self.volume_ma[0] and 
+                    ADX_slope_positive and 
+                    DIM_slope_positive):
                 self.order = self.sell()
 
         elif self.position:

@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 def main():
     poloFetcher = BitFetcher("poloniex", 'ETH/BTC', '30m')
-    poloFetcher.fetch_from(datetime(2017, 5, 1))
+    poloFetcher.fetch_from(datetime(2016, 5, 1))
     data = poloFetcher.data
     header = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']
     data_pd = pd.DataFrame(data, columns=header)
